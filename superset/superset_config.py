@@ -1,3 +1,0 @@
-import os
-
-SECRET_KEY='pNYvcP2oJ7xKd8qLm3nR5sT9vW1yA4bC6eF0gH2iJ3kM5nO6pQ=='

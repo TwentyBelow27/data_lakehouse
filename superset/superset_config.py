@@ -1,0 +1,3 @@
+import os 
+
+SECRET_KEY = 'GvXTF5CX2zqWA+PpTgQyrXG5aSmCGvh/KJJGH6UQXWrDnpHmX4Mv97lb'

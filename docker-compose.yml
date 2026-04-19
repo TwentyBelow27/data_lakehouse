@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    build:
+      context: ./clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/config.xml:/etc/clickhouse-server/config.xml
+      - ./clickhouse/users.xml:/etc/clickhouse-server/users.xml
+    # environment:
+    #   - CLICKHOUSE_USER=${CLICKHOUSE_USER:-admin}
+    #   - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-admin}
+    #   - CLICKHOUSE_DB=${CLICKHOUSE_DB:-test}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - data-network
+    profiles: ["core"]
+
+  superset:
+    build:
+      context: ./superset
+    ports:
+      - "8088:8088"
+    # environment:
+    #   # Переопределять переменные из Dockerfile не обязательно,
+    #   # но можно задать свои, если нужно.
+    #   - ADMIN_USERNAME=${SUPERSET_ADMIN_USERNAME:-admin}
+    #   - ADMIN_PASSWORD=${SUPERSET_ADMIN_PASSWORD:-admin}
+    #   - ADMIN_EMAIL=${SUPERSET_ADMIN_EMAIL:-admin@example.com}
+    #   # Если нужно переопределить конфиг или секретный ключ:
+    #   # - SUPERSET_SECRET_KEY=${SUPERSET_SECRET_KEY:-your-secret-key}
+    volumes:
+      - superset-data:/app/superset-home   # для метабазы и загруженных файлов
+      # При необходимости можно смонтировать конфиг ещё раз (он уже скопирован в образ)
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    networks:
+      - data-network
+    profiles: ["core"]
+    # Не указываем entrypoint/command, так как в Dockerfile уже задан ENTRYPOINT ["/app/docker-init.sh"]
+
+networks:
+  data-network:
+    driver: bridge
+
+volumes:
+  clickhouse-data:
+  superset-data:

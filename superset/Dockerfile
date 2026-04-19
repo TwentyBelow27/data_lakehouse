@@ -11,8 +11,6 @@ ENV ADMIN_USERNAME=admin \
 
 USER root
 
-RUN pip install clickhouse-connect=0.8.18
-
 # Копируем скрипт инициализации
 COPY docker-init.sh /app/docker-init.sh
 RUN chmod +x /app/docker-init.sh

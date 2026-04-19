@@ -1,19 +1,15 @@
 #!/bin/bash
+set -e
+pip install --user clickhouse-connect==0.8.18
+export PYTHONPATH="/app/superset_home/.local/lib/python3.10/site-packages:$PYTHONPATH"
 
-echo "Creating admin user..."
-superset fab create-admin \
-    --username "${ADMIN_USERNAME:-admin}" \
-    --password "${ADMIN_PASSWORD:-admin}" \
-    --firstname Admin \
-    --lastname User \
-    --email admin@example.com \
-    2>/dev/null || echo "Admin already exists"
-
-echo "Upgrading database..."
 superset db upgrade
-
-echo "Initializing Superset..."
+superset fab create-admin \
+  --username "${SUPERSET_ADMIN_USERNAME:-admin}" \
+  --firstname "${SUPERSET_ADMIN_FIRSTNAME:-Admin}" \
+  --lastname "${SUPERSET_ADMIN_LASTNAME:-User}" \
+  --email "${SUPERSET_ADMIN_EMAIL:-admin@superset.com}" \
+  --password "${SUPERSET_ADMIN_PASSWORD:-admin}" || true
 superset init
-
-echo "Starting Superset..."
-exec superset run -p 8088 --host 0.0.0.0
+# superset import_datasources -p /app/provisioning/databases.yaml || true
+exec superset run -h 0.0.0.0 -p 8088
